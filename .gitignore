@@ -1,0 +1,137 @@
+# .gitignore
+# Virtual environment folders
+LISTG-Env/
+.venv/
+env/
+venv/
+venv.bak/
+
+# Compiled Python files
+*.pyc
+__pycache__/
+
+# Environment and configuration files
+.env
+environment.yml
+
+# Editor and OS specific files
+.vscode/
+.DS_Store
+
+# Log, Cache, and Backup files
+*.log
+*.pid
+*.sock
+*.lock
+*.swp
+
+# Python packaging files
+pip-wheel-metadata/
+*.pyo
+*.pyd
+*.pdb
+pip-log.txt
+pip-delete-this-directory.txt
+__pypackages__/
+
+# Database files
+*.db
+*.sqlite3
+
+# Coverage and testing files
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Miscellaneous
+.ipynb_checkpoints
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# -------------------------
+# -------------------------
+
+
+
+
+
+# LISTG-Env/
+# *.pyc
+# __pycache__/
+
+# .env
+# .venv/
+# env/
+# venv/
+
+# venv.bak/
+# environment.yml
+# *.yml
+
+# instance/
+# .mypy_cache/
+# .pytest_cache/
+
+# *.db
+# *.sqlite3
+
+# .cache
+
+# .vscode/
+
+# .DS_Store
+
+# *.log
+# *.pid
+# *.sock
+# *.lock
+# *.swp
+# docker-compose.override.yml
+
+# pip-wheel-metadata/
+# *.pyo
+# *.pyd
+# *.pdb
+# pip-log.txt
+# pip-delete-this-directory.txt
+# __pypackages__/
+
+# migrations/
+
+# logs/
+# *.log
+
+# *.db
+# *.sqlite3
+
+# htmlcov/
+# .tox/
+# .coverage
+# .coverage.*
+# .cache
+# nosetests.xml
+# coverage.xml
+# *.cover
+# .hypothesis/
+
+# .mypy_cache/
+# .dmypy.json
+# dmypy.json
+
+# .python-version
+
+# .ipynb_checkpoints
+
+# .idea/
+# *.sublime-project
+# *.sublime-workspace
