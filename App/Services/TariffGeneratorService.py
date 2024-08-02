@@ -83,21 +83,21 @@ class TariffGeneratorService(object):
 
     def GenerateTargetFile(self,sourceFileName:str="Source.xlsx",sourceSheetName:str="Sheet1",targetFileName:str="Target.xlsx",targetSheetName:str="Sheet1")->Optional[Union[bool,str]]:
         try:
-            df=pd.DataFrame(index=[0],columns=[0])
+            dataFrame=pd.DataFrame(index=[0],columns=[0])
             plzZonePairList=self.GetPLZZonePairs(sourceFileName,sourceSheetName)
             for plzZonePair in plzZonePairList:
                 plzAddresses=self.ParsePLZValues(plzZonePair[0])
                 copyAddress=plzZonePair[1]
-                if copyAddress!=1:
-                    continue
                 for plzAddress in plzAddresses:
                     copiedColumnValues=self.GetSelectedZoneRange(sourceFileName,sourceSheetName,copyAddress)
                     targetValueAddress=self.TargetValueAddress(str(plzAddress))
                     targetValueRow,targetValueColumn=self.excelService.ExcelReferencetoIndex(targetValueAddress)
                     for value in copiedColumnValues:
-                        df.at[int(targetValueRow),int(targetValueColumn-1)]="{:.2f}".format(float(value))
+                        dataFrame.at[int(targetValueRow),int(targetValueColumn-1)]="{:.2f}".format(float(value))
                         targetValueRow+=1
-            fileGenerationResult=self.excelService.WriteExcel(targetFileName,targetSheetName,df)
+            orderedDataFrame=dataFrame.iloc[:,sorted(dataFrame.columns)]
+            orderedDataFrame.fillna("",inplace=True)
+            fileGenerationResult=self.excelService.WriteExcel(targetFileName,targetSheetName,dataFrame)
             if fileGenerationResult:
                 return True
             else:
