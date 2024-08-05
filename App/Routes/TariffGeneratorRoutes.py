@@ -54,7 +54,11 @@ def GenerateTargetFile():
     excelService=es(app.root_path)
     tariffGeneratorService=tgs(excelService)
     try:
-        return jsonify({"success":True,"message":f"{tariffGeneratorService.GenerateTargetFile(sourceFileName,sourceSheetName,targetFileName,targetSheetName)}"})
+        generatedTariffFile=tariffGeneratorService.GenerateTargetFile(sourceFileName,sourceSheetName,targetFileName,targetSheetName)
+        if generatedTariffFile:
+            return jsonify({"success":True,"message":f"{generatedTariffFile}"})
+        else:
+            return jsonify({"success":False,f"message":"Error: Target file could not be generated"})
     except Exception as e:
         return jsonify({"success":False,"message":f"Error: {e}"})
 

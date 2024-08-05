@@ -80,27 +80,66 @@ class TariffGeneratorService(object):
             "80":"CD6","81":"CE6","82":"CF6","83":"CG6","84":"CH6","85":"CI6","86":"CJ6","87":"CK6","88":"CL6","89":"CM6","90":"CN6","91":"CO6","92":"CP6","93":"CQ6","94":"CR6","95":"CS6","96":"CT6","97":"CU6","98":"CV6","99":"CW6"
             }
         return targetZoneValues.get(plzValueAddress,"Key not found")
+    
+    def FixColumns(self,dataFrame:pd.DataFrame)->Optional[Union[pd.DataFrame,str]]:
+        try:
+            columnswithOrder=[(col,int("".join(filter(str.isdigit,col)))) for col in dataFrame.columns if "".join(filter(str.isdigit,col)).isdigit()]
+            sortedColumnswithOrder=sorted(columnswithOrder,key=lambda x:x[1])
+            sortedColumns=[col for col,order in sortedColumnswithOrder]
+
+            sortedDataFrame=dataFrame.reindex(sortedColumns,axis=1)
+            return sortedDataFrame
+        except Exception as e:
+            return f"Error {e}"
 
     def GenerateTargetFile(self,sourceFileName:str="Source.xlsx",sourceSheetName:str="Sheet1",targetFileName:str="Target.xlsx",targetSheetName:str="Sheet1")->Optional[Union[bool,str]]:
         try:
-            dataFrame=pd.DataFrame(index=[0],columns=[0])
             plzZonePairList=self.GetPLZZonePairs(sourceFileName,sourceSheetName)
-            for plzZonePair in plzZonePairList:
-                plzAddresses=self.ParsePLZValues(plzZonePair[0])
-                copyAddress=plzZonePair[1]
-                for plzAddress in plzAddresses:
+            dataFrame=pd.DataFrame(index=[0],columns=[0])
+            for plz,zone in plzZonePairList:
+                plzValues=self.ParsePLZValues(plz)
+                copyAddress=zone
+                for plzValue in plzValues:
                     copiedColumnValues=self.GetSelectedZoneRange(sourceFileName,sourceSheetName,copyAddress)
-                    targetValueAddress=self.TargetValueAddress(str(plzAddress))
+                    targetValueAddress=self.TargetValueAddress(str(plzValue))
                     targetValueRow,targetValueColumn=self.excelService.ExcelReferencetoIndex(targetValueAddress)
                     for value in copiedColumnValues:
+                        if targetValueColumn>=len(dataFrame.columns):
+                            missingColumns=targetValueColumn-len(dataFrame.columns)+1
+                            dataFrame=pd.concat([dataFrame,pd.DataFrame(columns=[None]*missingColumns)],axis=1)
                         dataFrame.at[int(targetValueRow),int(targetValueColumn-1)]="{:.2f}".format(float(value))
                         targetValueRow+=1
-            orderedDataFrame=dataFrame.iloc[:,sorted(dataFrame.columns)]
-            orderedDataFrame.fillna("",inplace=True)
+            dataFrame=dataFrame.sort_index(axis=1)
             fileGenerationResult=self.excelService.WriteExcel(targetFileName,targetSheetName,dataFrame)
             if fileGenerationResult:
                 return True
             else:
                 return False
         except Exception as e:
-            return f"Error: {e}"
+            return f"Error {e}"
+
+
+
+
+
+        # try:
+        #     dataFrame=pd.DataFrame(index=[0],columns=[0])
+        #     plzZonePairList=self.GetPLZZonePairs(sourceFileName,sourceSheetName)
+        #     for plzZonePair in plzZonePairList:
+        #         plzAddresses=self.ParsePLZValues(plzZonePair[0])
+        #         copyAddress=plzZonePair[1]
+        #         for plzAddress in plzAddresses:
+        #             copiedColumnValues=self.GetSelectedZoneRange(sourceFileName,sourceSheetName,copyAddress)
+        #             targetValueAddress=self.TargetValueAddress(str(plzAddress))
+        #             targetValueRow,targetValueColumn=self.excelService.ExcelReferencetoIndex(targetValueAddress)
+        #             for value in copiedColumnValues:
+        #                 dataFrame.at[int(targetValueRow),int(targetValueColumn-1)]="{:.2f}".format(float(value))
+        #                 targetValueRow+=1
+        #     # orderedDataFrame=self.FixColumns(dataFrame)
+        #     fileGenerationResult=self.excelService.WriteExcel(targetFileName,targetSheetName,dataFrame)
+        #     if fileGenerationResult:
+        #         return True
+        #     else:
+        #         return False
+        # except Exception as e:
+        #     return f"Error: {e}"
