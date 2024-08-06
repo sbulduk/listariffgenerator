@@ -12,13 +12,6 @@ class TariffGeneratorService(object):
             return True
         return False
 
-    # TODO: Will be removed!
-    def GetCellAddress(self,fileName:str,sheetName:str,searchString:str)->Optional[Union[List[str],str]]:
-        try:
-            return self.excelService.GetCellAddress(fileName,sheetName,searchString)
-        except Exception as e:
-            return f"Error: {e}"
-
     def GetPLZZonePairs(self,fileName:str,sheetName:str)->Optional[Union[List[Tuple[str,str]],str]]:
         listofPLZZonePairs=[]
         plzAddresses=self.excelService.GetCellAddress(fileName,sheetName,"PLZ")
@@ -80,22 +73,12 @@ class TariffGeneratorService(object):
             "80":"CD6","81":"CE6","82":"CF6","83":"CG6","84":"CH6","85":"CI6","86":"CJ6","87":"CK6","88":"CL6","89":"CM6","90":"CN6","91":"CO6","92":"CP6","93":"CQ6","94":"CR6","95":"CS6","96":"CT6","97":"CU6","98":"CV6","99":"CW6"
             }
         return targetZoneValues.get(plzValueAddress,"Key not found")
-    
-    def FixColumns(self,dataFrame:pd.DataFrame)->Optional[Union[pd.DataFrame,str]]:
-        try:
-            columnswithOrder=[(col,int("".join(filter(str.isdigit,col)))) for col in dataFrame.columns if "".join(filter(str.isdigit,col)).isdigit()]
-            sortedColumnswithOrder=sorted(columnswithOrder,key=lambda x:x[1])
-            sortedColumns=[col for col,order in sortedColumnswithOrder]
-
-            sortedDataFrame=dataFrame.reindex(sortedColumns,axis=1)
-            return sortedDataFrame
-        except Exception as e:
-            return f"Error {e}"
 
     def GenerateTargetFile(self,sourceFileName:str="Source.xlsx",sourceSheetName:str="Sheet1",targetFileName:str="Target.xlsx",targetSheetName:str="Sheet1")->Optional[Union[bool,str]]:
         try:
             plzZonePairList=self.GetPLZZonePairs(sourceFileName,sourceSheetName)
-            dataFrame=pd.DataFrame(index=[0],columns=[0])
+            # dataFrame=pd.DataFrame(index=[0],columns=[0])
+            dataFrame=pd.DataFrame()
             for plz,zone in plzZonePairList:
                 plzValues=self.ParsePLZValues(plz)
                 copyAddress=zone
@@ -107,6 +90,8 @@ class TariffGeneratorService(object):
                         if targetValueColumn>=len(dataFrame.columns):
                             missingColumns=targetValueColumn-len(dataFrame.columns)+1
                             dataFrame=pd.concat([dataFrame,pd.DataFrame(columns=[None]*missingColumns)],axis=1)
+                        # else:
+                        #     dataFrame.at[int(targetValueRow),int(targetValueColumn)]=None
                         dataFrame.at[int(targetValueRow),int(targetValueColumn-1)]="{:.2f}".format(float(value))
                         targetValueRow+=1
             dataFrame=dataFrame.sort_index(axis=1)
@@ -121,7 +106,7 @@ class TariffGeneratorService(object):
 
 
 
-
+        # Previously working but not ordering the columns...
         # try:
         #     dataFrame=pd.DataFrame(index=[0],columns=[0])
         #     plzZonePairList=self.GetPLZZonePairs(sourceFileName,sourceSheetName)
