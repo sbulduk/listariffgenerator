@@ -61,6 +61,19 @@ def GenerateTargetFile():
             return jsonify({"success":False,f"message":"Error: Target file could not be generated"})
     except Exception as e:
         return jsonify({"success":False,"message":f"Error: {e}"})
+    
+@tariffGeneratorBlueprint.route("/test",methods=["POST"])
+def Test():
+    fileName=request.json.get("fileName")
+    sheetName=request.json.get("sheetName")
+    row=int(request.json.get("row"))
+    col=int(request.json.get("col"))
+    excelService=es(app.root_path)
+    tariffGeneratorService=tgs(excelService)
+
+    if tariffGeneratorService.TestWrite(fileName,sheetName,row,col):
+        return "Success"
+    return "Error"
 
 # TODO: Will be removed!
 @tariffGeneratorBlueprint.route("/getaddresswrtindices",methods=["GET"])

@@ -63,6 +63,18 @@ class TariffGeneratorService(object):
             return selectedZoneRange
         except Exception as e:
             return f"{e}"
+        
+    def GenerateLeftMenuItems(self,dataFrame:pd.DataFrame)->None:
+        leftMenuItemList={
+            "A6":"50","A7":"75","A8":"100","A9":"150",
+            "A10":"200","A11":"250","A12":"300","A13":"350","A14":"400","A15":"450","A16":"500","A17":"600","A18":"700","A19":"800",
+            "A20":"900","A21":"1000","A22":"1250","A23":"1500","A24":"1750","A25":"2000","A26":"2500","A27":"3000","A28":"3500","A29":"4000",
+            "A30":"4250","A31":"4500","A32":"5000","A33":"5500","A34":"6000","A35":"6500"
+            }
+        for cellAddress,cellValue in leftMenuItemList.items():
+            row,col=self.excelService.ExcelReferencetoIndex(cellAddress)
+            # print(f"{row} - {col}")
+            dataFrame.iloc[row,col]=cellValue
 
     def TargetValueAddress(self,plzValueAddress:str)->str:
         targetZoneValues={
@@ -77,8 +89,23 @@ class TariffGeneratorService(object):
     def GenerateTargetFile(self,sourceFileName:str="Source.xlsx",sourceSheetName:str="Sheet1",targetFileName:str="Target.xlsx",targetSheetName:str="Sheet1")->Optional[Union[bool,str]]:
         try:
             plzZonePairList=self.GetPLZZonePairs(sourceFileName,sourceSheetName)
-            # dataFrame=pd.DataFrame(index=[0],columns=[0])
-            dataFrame=pd.DataFrame()
+            dataFrame=pd.DataFrame(index=range(128),columns=range(128))
+            
+            A1Cell=self.excelService.WriteDatatoDataFrame(dataFrame,"A1","Tariff Name: ERVIN_BE_TAT")
+            A2Cell=self.excelService.WriteDatatoDataFrame(dataFrame,"A2","Valid From: 01.12.2023 00:00:00")
+            A3Cell=self.excelService.WriteDatatoDataFrame(dataFrame,"A3","Valid Till: ")
+            B4Cell=self.excelService.WriteDatatoDataFrame(dataFrame,"B4","Entlade-PLZ zweistellig")
+            A5Cell=self.excelService.WriteDatatoDataFrame(dataFrame,"A5","(bis)tats. Gewicht")
+
+            self.GenerateLeftMenuItems(dataFrame)
+
+            headerStartCell="B5"
+            headerRow,headerColumn=self.excelService.ExcelReferencetoIndex(headerStartCell)
+            twoDigitHeaders=[f"{num:02}" for num in range(0,100)]
+            for header in twoDigitHeaders:
+                dataFrame.iloc[headerRow,headerColumn]=header
+                headerColumn+=1
+
             for plz,zone in plzZonePairList:
                 plzValues=self.ParsePLZValues(plz)
                 copyAddress=zone
@@ -87,12 +114,10 @@ class TariffGeneratorService(object):
                     targetValueAddress=self.TargetValueAddress(str(plzValue))
                     targetValueRow,targetValueColumn=self.excelService.ExcelReferencetoIndex(targetValueAddress)
                     for value in copiedColumnValues:
-                        if targetValueColumn>=len(dataFrame.columns):
-                            missingColumns=targetValueColumn-len(dataFrame.columns)+1
-                            dataFrame=pd.concat([dataFrame,pd.DataFrame(columns=[None]*missingColumns)],axis=1)
-                        # else:
-                        #     dataFrame.at[int(targetValueRow),int(targetValueColumn)]=None
-                        dataFrame.at[int(targetValueRow),int(targetValueColumn-1)]="{:.2f}".format(float(value))
+                        # if targetValueColumn>=len(dataFrame.columns):
+                        #     missingColumns=targetValueColumn-len(dataFrame.columns)+1
+                        #     dataFrame=pd.concat([dataFrame,pd.DataFrame(columns=[None]*missingColumns)],axis=1)
+                        dataFrame.at[int(targetValueRow),int(targetValueColumn)]="{:.2f}".format(float(value))
                         targetValueRow+=1
             dataFrame=dataFrame.sort_index(axis=1)
             fileGenerationResult=self.excelService.WriteExcel(targetFileName,targetSheetName,dataFrame)
@@ -102,29 +127,17 @@ class TariffGeneratorService(object):
                 return False
         except Exception as e:
             return f"Error {e}"
-
-
-
-
-        # Previously working but not ordering the columns...
-        # try:
-        #     dataFrame=pd.DataFrame(index=[0],columns=[0])
-        #     plzZonePairList=self.GetPLZZonePairs(sourceFileName,sourceSheetName)
-        #     for plzZonePair in plzZonePairList:
-        #         plzAddresses=self.ParsePLZValues(plzZonePair[0])
-        #         copyAddress=plzZonePair[1]
-        #         for plzAddress in plzAddresses:
-        #             copiedColumnValues=self.GetSelectedZoneRange(sourceFileName,sourceSheetName,copyAddress)
-        #             targetValueAddress=self.TargetValueAddress(str(plzAddress))
-        #             targetValueRow,targetValueColumn=self.excelService.ExcelReferencetoIndex(targetValueAddress)
-        #             for value in copiedColumnValues:
-        #                 dataFrame.at[int(targetValueRow),int(targetValueColumn-1)]="{:.2f}".format(float(value))
-        #                 targetValueRow+=1
-        #     # orderedDataFrame=self.FixColumns(dataFrame)
-        #     fileGenerationResult=self.excelService.WriteExcel(targetFileName,targetSheetName,dataFrame)
-        #     if fileGenerationResult:
-        #         return True
-        #     else:
-        #         return False
-        # except Exception as e:
-        #     return f"Error: {e}"
+        
+    def TestWrite(self,fileName:str="Target.xlsx",sheetName:str="Sheet1",row:int=0,col:int=0):
+        dataFrame=pd.DataFrame(index=range(row+1),columns=range(col+1))
+        if row<0 or col<0:
+            raise ValueError("Row and column indices must be positive integers")
+        print(f"DataFrame Shape[0]: {dataFrame.shape[0]}")
+        print(f"DataFrame Shape[1]: {dataFrame.shape[1]}")
+        if row>dataFrame.shape[0] or col>dataFrame.shape[1]:
+            raise IndexError("Row or column index is out of bounds.")
+        dataFrame.iloc[row,col]="Serdar"
+        result=self.excelService.WriteExcel(fileName,sheetName,dataFrame)
+        if result:
+            return True
+        return False

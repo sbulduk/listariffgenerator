@@ -42,11 +42,11 @@ class ExcelService(object):
         try:
             if fileExists:
                 with pd.ExcelWriter(path,engine="openpyxl",mode="a",if_sheet_exists="replace") as writer:
-                    data.to_excel(writer,sheet_name=sheetName,index=False)
+                    data.to_excel(writer,sheet_name=sheetName,index=False,header=False)
                 return True
             else:
                 with pd.ExcelWriter(path,engine="openpyxl",mode="w") as writer:
-                    data.to_excel(writer,sheet_name=sheetName,index=False)
+                    data.to_excel(writer,sheet_name=sheetName,index=False,header=False)
                 return True
         except:
             return False
@@ -101,14 +101,22 @@ class ExcelService(object):
             print(f"Error while reading range: {e}")
             raise   
 
-    def WriteDatatoCell(self,fileName:str,sheetName:str,cellAddress:str,data:Union[str,float])->None:
-        df=self.ReadExcel(fileName,sheetName)
-        row,col=self.ExcelReferencetoIndex(cellAddress)
-        if(row<df.shape[0] and col<df.shape[1]):
-            df.iloc[row,col]=data
-            self.WriteExcel(fileName,sheetName,df)
-        else:
-            print(f"Error: Cell address is out of bounds.")
+    # def WriteDatatoCell(self,fileName:str,sheetName:str,cellAddress:str,data:Union[str,float])->None:
+    #     df=self.ReadExcel(fileName,sheetName)
+    #     row,col=self.ExcelReferencetoIndex(cellAddress)
+    #     if(row<df.shape[0] and col<df.shape[1]):
+    #         df.iloc[row,col]=data
+    #         self.WriteExcel(fileName,sheetName,df)
+    #     else:
+    #         print(f"Error: Cell address is out of bounds.")
+
+    def WriteDatatoDataFrame(self,dataFrame:pd.DataFrame,cellAddress:str,data:Union[str,int,float])->Union[bool,str]:
+        try:
+            row,col=self.ExcelReferencetoIndex(cellAddress)
+            dataFrame.iloc[row,col]=data
+            return True
+        except Exception as e:
+            return f"Error: {e}"
 
     def CheckInstantCell(self,fileName:str,sheetName:str,cellAddress:str)->bool:
         df=self.ReadExcel(fileName,sheetName)
