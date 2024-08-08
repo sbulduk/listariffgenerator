@@ -6,12 +6,6 @@ class TariffGeneratorService(object):
     def __init__(self,excelService:ExcelService)->None:
         self.excelService=excelService
 
-    def CheckCellContains(self,fileName:str,sheetName:str,cellAddress:str,data:str)->bool:
-        cellAddressValue=self.excelService.ReadCell(fileName,sheetName,cellAddress)
-        if(str(cellAddressValue)==str(data)):
-            return True
-        return False
-
     def GetPLZZonePairs(self,fileName:str,sheetName:str)->Optional[Union[List[Tuple[str,str]],str]]:
         listofPLZZonePairs=[]
         plzAddresses=self.excelService.GetCellAddress(fileName,sheetName,"PLZ")
@@ -73,7 +67,6 @@ class TariffGeneratorService(object):
             }
         for cellAddress,cellValue in leftMenuItemList.items():
             row,col=self.excelService.ExcelReferencetoIndex(cellAddress)
-            # print(f"{row} - {col}")
             dataFrame.iloc[row,col]=cellValue
 
     def TargetValueAddress(self,plzValueAddress:str)->str:
@@ -114,9 +107,6 @@ class TariffGeneratorService(object):
                     targetValueAddress=self.TargetValueAddress(str(plzValue))
                     targetValueRow,targetValueColumn=self.excelService.ExcelReferencetoIndex(targetValueAddress)
                     for value in copiedColumnValues:
-                        # if targetValueColumn>=len(dataFrame.columns):
-                        #     missingColumns=targetValueColumn-len(dataFrame.columns)+1
-                        #     dataFrame=pd.concat([dataFrame,pd.DataFrame(columns=[None]*missingColumns)],axis=1)
                         dataFrame.at[int(targetValueRow),int(targetValueColumn)]="{:.2f}".format(float(value))
                         targetValueRow+=1
             dataFrame=dataFrame.sort_index(axis=1)
@@ -127,17 +117,3 @@ class TariffGeneratorService(object):
                 return False
         except Exception as e:
             return f"Error {e}"
-        
-    def TestWrite(self,fileName:str="Target.xlsx",sheetName:str="Sheet1",row:int=0,col:int=0):
-        dataFrame=pd.DataFrame(index=range(row+1),columns=range(col+1))
-        if row<0 or col<0:
-            raise ValueError("Row and column indices must be positive integers")
-        print(f"DataFrame Shape[0]: {dataFrame.shape[0]}")
-        print(f"DataFrame Shape[1]: {dataFrame.shape[1]}")
-        if row>dataFrame.shape[0] or col>dataFrame.shape[1]:
-            raise IndexError("Row or column index is out of bounds.")
-        dataFrame.iloc[row,col]="Serdar"
-        result=self.excelService.WriteExcel(fileName,sheetName,dataFrame)
-        if result:
-            return True
-        return False

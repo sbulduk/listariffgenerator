@@ -99,16 +99,7 @@ class ExcelService(object):
             return df.iloc[startRow:endRow+1,startCol:endCol+1]
         except IndexError as e:
             print(f"Error while reading range: {e}")
-            raise   
-
-    # def WriteDatatoCell(self,fileName:str,sheetName:str,cellAddress:str,data:Union[str,float])->None:
-    #     df=self.ReadExcel(fileName,sheetName)
-    #     row,col=self.ExcelReferencetoIndex(cellAddress)
-    #     if(row<df.shape[0] and col<df.shape[1]):
-    #         df.iloc[row,col]=data
-    #         self.WriteExcel(fileName,sheetName,df)
-    #     else:
-    #         print(f"Error: Cell address is out of bounds.")
+            raise
 
     def WriteDatatoDataFrame(self,dataFrame:pd.DataFrame,cellAddress:str,data:Union[str,int,float])->Union[bool,str]:
         try:
