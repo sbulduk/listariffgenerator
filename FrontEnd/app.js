@@ -29,7 +29,7 @@ document.getElementById("runButton").addEventListener("click",async function(){
         loadingIcon.style.display="none";
 
         if (response.ok){
-            resultArea.innerHTML=`<p class="text-success">Success:${data.message}</p>`;
+            resultArea.innerHTML=`<p class="text-success">Success: ${data.message}</p>`;
             if (data.url){
                 resultArea.innerHTML+=`<p><a href="${data.url}" class="btn btn-primary" download>Download Generated File</a></p>`;
             }

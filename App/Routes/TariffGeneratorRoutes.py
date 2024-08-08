@@ -4,8 +4,6 @@ from ..Services.ExcelService import ExcelService as es
 from ..Services.TariffGeneratorService import TariffGeneratorService as tgs
 
 tariffGeneratorBlueprint=Blueprint("tariffGeneratorBlueprint",__name__,url_prefix="/api/tariff")
-
-FILES_DIRECTORY=os.path.join(os.getcwd(),"App","Files")
     
 @tariffGeneratorBlueprint.route("/generatetargetfile",methods=["POST"])
 def GenerateTargetFile():
@@ -20,12 +18,16 @@ def GenerateTargetFile():
         generatedTariffFile=tariffGeneratorService.GenerateTargetFile(sourceFileName,sourceSheetName,targetFileName,targetSheetName)
         if generatedTariffFile:
             fileUrl=f"/files/{targetFileName}"
-            return jsonify({"success":True,"message":f"File generated successfully","url":f"{fileUrl}"})
+            return jsonify({"success":True,"message":f"File generated successfully","url":f"{fileUrl}"}),200
         else:
-            return jsonify({"success":False,f"message":"Error: Target file could not be generated"})
+            return jsonify({"success":False,f"message":"Error: Target file could not be generated"}),400
     except Exception as e:
-        return jsonify({"success":False,"message":f"Error: {e}"})
+        return jsonify({"success":False,"message":f"Error: {e}"}),500
 
-@tariffGeneratorBlueprint.route("/files/<fileName>",methods=["GET"])
+@tariffGeneratorBlueprint.route("/files/<path:fileName>",methods=["GET"])
 def DownloadFile(fileName:str):
-    return send_from_directory(FILES_DIRECTORY,fileName)
+    try:
+        localDirectory=os.path.join(app.root_path,"App","Files")
+        return send_from_directory(directory=localDirectory,path=fileName,as_attachment=True)
+    except FileNotFoundError:
+        return jsonify({"success":False,"message":f"Error: File not found"}),404
