@@ -36,7 +36,7 @@ document.getElementById("runButton").addEventListener("click",async function(){
         }else{
             resultArea.innerHTML=`<p class="text-danger">Error: ${data.message}</p>`;
         }
-    }catch (error){
+    }catch(error){
         loadingIcon.style.display="none";
         resultArea.innerHTML=`<p class="text-danger">Error: ${error.message}</p>`;
     }

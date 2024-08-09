@@ -6,24 +6,6 @@ class TariffGeneratorService(object):
     def __init__(self,excelService:ExcelService)->None:
         self.excelService=excelService
 
-    def GetPLZZonePairs(self,fileName:str,sheetName:str)->Optional[Union[List[Tuple[str,str]],str]]:
-        listofPLZZonePairs=[]
-        plzAddresses=self.excelService.GetCellAddress(fileName,sheetName,"PLZ")
-        if not plzAddresses:
-            return f"PLZ value not found in: {fileName}-{sheetName}"
-        for plzAddress in plzAddresses:
-            plzRow,plzColumn=self.excelService.ExcelReferencetoIndex(plzAddress)
-            instantPLZRow,instantPLZColumn=plzRow+1,plzColumn
-            instantPLZAddress=self.excelService.IndextoExcelReference(instantPLZRow,instantPLZColumn)
-            while self.excelService.CheckInstantCell(fileName,sheetName,instantPLZAddress):
-                preProcessedPLZString=self.PreProcessPLZString(self.excelService.ReadCell(fileName,sheetName,instantPLZAddress))
-                zoneValue=self.excelService.ReadCell(fileName,sheetName,self.excelService.IndextoExcelReference(instantPLZRow,instantPLZColumn+1))
-                keyValuePair=(preProcessedPLZString,zoneValue)
-                listofPLZZonePairs.append(keyValuePair)
-                instantPLZRow,instantPLZColumn=instantPLZRow+1,instantPLZColumn
-                instantPLZAddress=self.excelService.IndextoExcelReference(instantPLZRow,instantPLZColumn)
-        return listofPLZZonePairs
-
     def PreProcessPLZString(self,plzString:str)->List[str]:
         plzString=plzString.replace(" ","").replace(",-","&").replace("+","&").replace(", -","&").replace(",","&").replace("--","&")
         if("-" in plzString and plzString.count("-")==1):
@@ -41,6 +23,24 @@ class TariffGeneratorService(object):
             return list(map(int,plzValueString.split("&")))
         else:
             return [int(plzValueString)]
+
+    def GetPLZZonePairs(self,fileName:str,sheetName:str)->Optional[Union[List[Tuple[str,str]],str]]:
+        listofPLZZonePairs=[]
+        plzAddresses=self.excelService.GetCellAddress(fileName,sheetName,"PLZ")
+        if not plzAddresses:
+            return f"PLZ value not found in: {fileName}-{sheetName}"
+        for plzAddress in plzAddresses:
+            plzRow,plzColumn=self.excelService.ExcelReferencetoIndex(plzAddress)
+            instantPLZRow,instantPLZColumn=plzRow+1,plzColumn
+            instantPLZAddress=self.excelService.IndextoExcelReference(instantPLZRow,instantPLZColumn)
+            while self.excelService.CheckInstantCell(fileName,sheetName,instantPLZAddress):
+                preProcessedPLZString=self.PreProcessPLZString(self.excelService.ReadCell(fileName,sheetName,instantPLZAddress))
+                zoneValue=self.excelService.ReadCell(fileName,sheetName,self.excelService.IndextoExcelReference(instantPLZRow,instantPLZColumn+1))
+                keyValuePair=(preProcessedPLZString,zoneValue)
+                listofPLZZonePairs.append(keyValuePair)
+                instantPLZRow,instantPLZColumn=instantPLZRow+1,instantPLZColumn
+                instantPLZAddress=self.excelService.IndextoExcelReference(instantPLZRow,instantPLZColumn)
+        return listofPLZZonePairs
 
     def GetSelectedZoneRange(self,fileName:str,sheetName:str,zoneColumnNumber:str)->Optional[Union[List[int],str]]:
         try:
@@ -107,7 +107,7 @@ class TariffGeneratorService(object):
                     targetValueAddress=self.TargetValueAddress(str(plzValue))
                     targetValueRow,targetValueColumn=self.excelService.ExcelReferencetoIndex(targetValueAddress)
                     for value in copiedColumnValues:
-                        dataFrame.at[int(targetValueRow),int(targetValueColumn)]="{:.2f}".format(float(value))
+                        dataFrame.at[int(targetValueRow),int(targetValueColumn)]="{:.2f}".format(float(value)).replace(".",",")
                         targetValueRow+=1
             dataFrame=dataFrame.sort_index(axis=1)
             fileGenerationResult=self.excelService.WriteExcel(targetFileName,targetSheetName,dataFrame)
