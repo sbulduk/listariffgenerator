@@ -1,4 +1,7 @@
 # Virtual environment folders
+App/Files
+*.xlsx
+*.xls
 LISTG-Env/
 .venv/
 env/
