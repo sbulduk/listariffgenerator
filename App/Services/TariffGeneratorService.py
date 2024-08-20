@@ -1,10 +1,21 @@
 from .ExcelService import ExcelService
-from typing import Optional,Dict,List,Union,Tuple
+import datetime
+from typing import Optional,List,Union,Tuple
 import pandas as pd
 
 class TariffGeneratorService(object):
     def __init__(self,excelService:ExcelService)->None:
         self.excelService=excelService
+
+    def HandleNameFormat(self,fileName:str)->str:
+        currentTime=datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+        exactFileName=fileName.split(".",1)
+        if len(exactFileName)==1:
+            if exactFileName[0]:
+                return f"{exactFileName[0]}_{currentTime}"
+            return currentTime
+        else:
+            return f"{exactFileName[0]}_{currentTime}.{exactFileName[1]}"
 
     def HandleFileNamesandExtensions(self,*args:str)->tuple[str]:
         processedFileNames=[]
