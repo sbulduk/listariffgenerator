@@ -60,6 +60,11 @@ dmypy.json
 *.sublime-project
 *.sublime-workspace
 
+# External files
+*.7z
+*.zip
+*.rar
+
 # -------------------------
 # -------------------------
 

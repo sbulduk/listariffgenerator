@@ -4,13 +4,49 @@ from ..Services.TariffGeneratorService import TariffGeneratorService as tgs
 import os
 
 tariffGeneratorBlueprint=Blueprint("tariffGeneratorBlueprint",__name__,url_prefix="/api/tariff")
-    
+
+UPLOAD_FOLDER = os.path.join(os.getcwd(), "App\Files")
+ALLOWED_EXTENSIONS = {"xlsx"}
+
+def AllowedFile(filename):
+    return "." in filename and filename.rsplit(".",1)[1].lower() in ALLOWED_EXTENSIONS
+
+@tariffGeneratorBlueprint.route("/upload",methods=["POST"])
+def UploadFile():
+    print(f"A")
+    if "sourceFile" not in request.files:
+        return jsonify({"success":False,"message":"No file part"}),400
+    else:
+        print(f"B")
+    file=request.files["sourceFile"]
+    print(f"C {file}")
+    print(f"------------------------------------------------------------")
+    print(f"D {file.filename}")
+    if file.filename=="":
+        return jsonify({"success":False,"message":"No selected file"}),400
+
+    if file and AllowedFile(file.filename):
+        print(f"E")
+        filename=file.filename
+        print(f"F")
+        file.save(os.path.join(UPLOAD_FOLDER,filename))
+        print(f"G -: {UPLOAD_FOLDER}")
+        return jsonify({"success":True,"fileName":filename}),200
+    print(f"H")
+    return jsonify({"success":False,"message":"File type not allowed"}),400
+
 @tariffGeneratorBlueprint.route("/generatetargetfile",methods=["POST"])
 def GenerateTargetFile():
-    sourceFileName=request.json.get("sourceFileName")
-    sourceSheetName=request.json.get("sourceSheetName")
-    targetFileName=request.json.get("targetFileName")
-    targetSheetName=request.json.get("targetSheetName")
+    sourceFileName=request.json.get("sourceFile")
+    sourceSheetName=request.json.get("sourceSheet")
+    if sourceSheetName=="":
+        sourceSheetName="Sheet1"
+    targetFileName=request.json.get("targetFile")
+    if not targetFileName.endswith((".xlsx",".xls",".csv")):
+        targetFileName+=".xlsx"
+    targetSheetName=request.json.get("targetSheet")
+    if targetSheetName=="":
+        targetSheetName="Sheet1"
 
     excelService=es(app.root_path)
     tariffGeneratorService=tgs(excelService)

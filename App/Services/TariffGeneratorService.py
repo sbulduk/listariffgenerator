@@ -6,6 +6,22 @@ class TariffGeneratorService(object):
     def __init__(self,excelService:ExcelService)->None:
         self.excelService=excelService
 
+    def HandleFileNamesandExtensions(self,*args:str)->tuple[str]:
+        processedFileNames=[]
+        for strValue in args:
+            if not strValue.endswith((".xlsx",".xls",".csv")):
+                strValue+=".xlsx"
+            processedFileNames.append(strValue)
+        return processedFileNames
+    
+    def HandleSheetNames(self,*args:str)->tuple[str]:
+        processedSheetNames=[]
+        for strValue in args:
+            if strValue=="" or strValue==None:
+                strValue="Sheet1"
+            processedSheetNames.append(strValue)
+        return processedSheetNames
+
     def PreProcessPLZString(self,plzString:str)->List[str]:
         plzString=plzString.replace(" ","").replace(",-","&").replace("+","&").replace(", -","&").replace(",","&").replace("--","&")
         if("-" in plzString and plzString.count("-")==1):

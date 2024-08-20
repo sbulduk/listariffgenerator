@@ -35,8 +35,14 @@ class ExcelService(object):
             colStr=chr(col%26+ord("A"))+colStr
             col=col//26-1
             return f"{colStr}{row+1}"
+        
+    def ParseRangetoCellIndices(self,cellRange:str):
+        startAddress,endAddress=cellRange.split(":")
+        startRow,startCol=self.ExcelReferencetoIndex(startAddress)
+        endRow,endCol=self.ExcelReferencetoIndex(endAddress)
+        return startRow,startCol,endRow,endCol
 
-    def WriteExcel(self,fileName:str,sheetName:str,data:pd.DataFrame)->bool:
+    def WriteExcel(self,fileName:str,sheetName:str,data:pd.DataFrame,updateCellRange:str=None)->bool:
         path=self.GetFilePath(fileName)
         fileExists=os.path.isfile(path)
         try:
@@ -50,6 +56,26 @@ class ExcelService(object):
                 return True
         except:
             return False
+        
+        # path=self.GetFilePath(fileName)
+        # fileExists=os.path.isfile(path)
+        # try:
+        #     if fileExists:
+        #         if updateCellRange:
+        #             writer=pd.ExcelWriter(fileName,engine="openpyxl",mode="a",if_sheet_exists="overlay")
+        #             startRow,startCol,endRow,endCol=self.ParseRangetoCellIndices(updateCellRange)
+        #             for row in range(startRow-1,endRow):
+        #                 for col in range(startCol-1,endCol):
+        #                     sheetName.cell(row=row+1,col=col+1).value=None
+        #             dataFrame.to_excel(writer,sheet_name=sheetName,startrow=startRow-1,startcol=startCol-1,index=False,header=False)
+        #             writer.save()
+        #         return True
+        #     else:
+        #         with pd.ExcelWriter(path,engine="openpyxl",mode="w") as writer:
+        #             dataFrame.to_excel(writer,sheet_name=sheetName,index=False,header=False)
+        #         return True
+        # except:
+        #     return False
 
     def RemoveFile(self,fileName:str)->bool:
         path=self.GetFilePath(fileName)
@@ -89,17 +115,19 @@ class ExcelService(object):
         if(row<df.shape[0] and col<df.shape[1]):
             return df.iloc[row-1,col]
         return None
-
-    def ReadCellRange(self,fileName:str,sheetName:str,cellRange:str)->pd.DataFrame:
-        df=self.ReadExcel(fileName,sheetName)
+    
+    def ReadCellRange(self,fileName:str,sheetName:str,cellRange:str)->Union[pd.DataFrame,str]:
+        dataFrame=self.ReadExcel(fileName,sheetName)
         startAddress,endAddress=cellRange.split(":")
         startRow,startCol=self.ExcelReferencetoIndex(startAddress)
         endRow,endCol=self.ExcelReferencetoIndex(endAddress)
         try:
-            return df.iloc[startRow:endRow+1,startCol:endCol+1]
+            return dataFrame.iloc[startRow:endRow+1,startCol:endCol+1]
         except IndexError as e:
-            print(f"Error while reading range: {e}")
-            raise
+            return f"Error while reading range: {e}"
+        
+    def TransposeofDataFrame(self,dataFrame:pd.DataFrame)->Union[pd.DataFrame,str]:
+        return dataFrame.T
 
     def WriteDatatoDataFrame(self,dataFrame:pd.DataFrame,cellAddress:str,data:Union[str,int,float])->Union[bool,str]:
         try:
