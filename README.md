@@ -34,6 +34,7 @@ Ensure you have the necessary packages installed by running:
 
 ```bash
 pip install -r requirements.txt
+```
 
 ## FrontEnd
 There are four fields to be filled in the frontend.
