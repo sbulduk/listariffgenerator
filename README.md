@@ -1,4 +1,9 @@
 # LIS Tariff Generator Quick Documentation
+## Overview
+This application is a simple Flask-based tool designed to handle Excel file conversions. It processes an uploaded Excel file and generates a target file based on predefined rules. The application consists of two main parts: 
+1. Backend (built with Python/Flask)
+2. Frontend (built with HTML, CSS, Vanilla JS)
+
 ## Endpoints
 ### 1. File Upload Endpoint
 URL: /upload
@@ -19,10 +24,7 @@ The frontend communicates with the backend to:
 Upload the file.
 Trigger the generatetargetfile endpoint to handle the processing.
 
-## Overview
-This application is a simple Flask-based tool designed to handle Excel file conversions. It processes an uploaded Excel file and generates a target file based on predefined rules. The application consists of two main parts: 
-1. Backend (built with Python/Flask)
-2. Frontend (built with HTML, CSS, Vanilla JS)
+
 
 ## Basic Prerequisites
 - Python 3.x (At least 3.11 is recommended.)
