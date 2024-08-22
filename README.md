@@ -1,4 +1,4 @@
-# LIS Tariff Generator Application
+# LIS Tariff Generator Quick Documentation
 ## Endpoints
 ### 1. File Upload Endpoint
 URL: /upload
@@ -34,3 +34,10 @@ Ensure you have the necessary packages installed by running:
 
 ```bash
 pip install -r requirements.txt
+
+## FrontEnd
+There are four fields to be filled in the frontend.
+### 1. Source File: The source file can be selected via this field. There is no default value for this field.
+### 2. Source Sheet: This area selects the sheet name of the source file to be read. It's default value is "Sheet1" which means can be left blank if the sheet name is "Sheet1".
+### 3. Target File: Determines the name of the Excel file to be created as result. It adds instantaneous time and date at the end of the specified file name.
+Notice: If this area is lef blank then the file, to be created, is named as "instant time&date.xlsx"
