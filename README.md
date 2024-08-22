@@ -1,11 +1,10 @@
 # LIS Tariff Generator Application
-
 ## Endpoints
-1. File Upload Endpoint
+### 1. File Upload Endpoint
 URL: /upload
 Method: POST
 Description: This endpoint allows the user to upload an Excel file to the backend. The file will be saved in the App/Files folder, and the filename (including extension) will be returned if the upload is successful.
-2. Generate Target File Endpoint
+### 2. Generate Target File Endpoint
 URL: /generatetargetfile
 Method: POST
 Description: This endpoint takes the filename from the uploaded file and processes it to generate the target Excel file.
@@ -20,14 +19,13 @@ The frontend communicates with the backend to:
 Upload the file.
 Trigger the generatetargetfile endpoint to handle the processing.
 
-
 ## Overview
 This application is a simple Flask-based tool designed to handle Excel file conversions. It processes an uploaded Excel file and generates a target file based on predefined rules. The application consists of two main parts: 
 1. Backend (built with Python/Flask)
 2. Frontend (built with HTML, CSS, Vanilla JS)
 
-## Prerequisites
-- Python 3.x
+## Basic Prerequisites
+- Python 3.x (At least 3.11 is recommended.)
 - Flask
 - Pandas
 - Openpyxl
